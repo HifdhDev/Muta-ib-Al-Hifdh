@@ -1,0 +1,459 @@
+:root {
+    --primary-color: #059669; /* Emerald 600 */
+    --primary-light: #34d399;
+    --primary-dark: #065f46;
+    --secondary-color: #d97706; /* Amber 600 */
+    --accent-color: #10b981;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --radius: 16px;
+    --font-main: 'Tajawal', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 30px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo .icon {
+    font-size: 24px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.date-display {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Hero Card */
+.hero-card {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    color: white;
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 60%;
+    height: 140%;
+    background: rgba(255, 255, 255, 0.05);
+    transform: rotate(25deg);
+}
+
+.hero-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.student-name-container {
+    margin-top: 10px;
+}
+
+#studentNameInput {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 8px 15px;
+    color: white;
+    width: 100%;
+    max-width: 300px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 500;
+    outline: none;
+    transition: background 0.3s;
+}
+
+#studentNameInput::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#studentNameInput:focus {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: white;
+}
+
+.stats-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Modules Grid */
+.action-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.module-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.module-card h3 {
+    margin-bottom: 20px;
+    color: var(--primary-dark);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+input[type="text"] {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-light);
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    width: 90%;
+    max-width: 450px;
+    border-radius: var(--radius);
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+/* Achievement Card Print View */
+.achievement-card-print {
+    background: linear-gradient(135deg, #ffffff, #f0fdf4);
+    border: 2px solid var(--primary-light);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 15px;
+}
+
+.card-logo {
+    font-size: 40px;
+}
+
+.card-title h3 {
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.card-title p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.student-info {
+    margin: 15px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.student-info .label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.achievement-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.detail-item .icon {
+    font-size: 1.5rem;
+}
+
+.detail-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-text .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.detail-text .value {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.value.highlight {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.card-footer {
+    margin-top: 25px;
+    text-align: center;
+    border-top: 1px dashed var(--primary-light);
+    padding-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.share-final-btn {
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #b45309;
+}
+
+/* Share Card */
+.share-card {
+    margin-top: 25px;
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.share-card h3 {
+    color: var(--secondary-color);
+}
+
+.share-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Footer */
+.app-footer {
+    margin-top: auto;
+    padding: 40px 0 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Evaluation Buttons */
+.evaluation-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.eval-btn {
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.eval-btn:active {
+    transform: scale(0.95);
+}
+
+.eval-btn.excel { background-color: #059669; }
+.eval-btn.vgood { background-color: #10b981; }
+.eval-btn.good { background-color: #f59e0b; }
+.eval-btn.needs-work { background-color: #ef4444; }
+
+.section-hint {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.selected-eval-display {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--primary-dark);
+}
+
+.selected-eval-display span {
+    color: var(--secondary-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-card, .module-card, .share-card, .modal-content {
+    animation: fadeIn 0.5s ease-out forwards;
+}
