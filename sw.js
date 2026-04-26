@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hifdh-tracker-v2-unique';
+const CACHE_NAME = 'hifdh-tracker-v3-final';
 const assets = [
     './',
     './index.html',
@@ -10,7 +10,7 @@ const assets = [
 
 // Install Service Worker
 self.addEventListener('install', e => {
-    self.skipWaiting(); // Force update
+    self.skipWaiting();
     e.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
             return cache.addAll(assets);
@@ -18,7 +18,7 @@ self.addEventListener('install', e => {
     );
 });
 
-// Activate & Cleanup old caches
+// Activate & Cleanup
 self.addEventListener('activate', e => {
     e.waitUntil(
         caches.keys().then(keys => {

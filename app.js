@@ -1,3 +1,4 @@
+// Version: 1.1 - Added History Sharing
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
