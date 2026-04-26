@@ -25,13 +25,25 @@
         </header>
 
         <main class="dashboard">
+            <!-- Student Management Section -->
+            <section class="student-manager">
+                <div class="section-header">
+                    <h3>👥 قائمة الطلاب</h3>
+                    <button class="btn-add-student" onclick="showAddStudentPrompt()">+ إضافة طالب</button>
+                </div>
+                <div id="studentList" class="student-list">
+                    <!-- Students will be injected here -->
+                </div>
+            </section>
+
             <!-- Today's Hero Section -->
-            <section class="hero-card">
+            <section class="hero-card" id="currentStudentCard">
                 <div class="hero-content">
-                    <h2>إنجاز اليوم</h2>
-                    <div class="student-name-container">
-                        <input type="text" id="studentNameInput" placeholder="اكتب اسم الطالب هنا..." oninput="updateStudentName()" aria-label="اسم الطالب">
+                    <div class="student-header">
+                        <h2 id="activeStudentName">اختر طالباً</h2>
+                        <span id="activeStudentPhone" class="student-phone-badge"></span>
                     </div>
+                    <p class="subtitle">تتبع إنجاز الطالب الحالي لليوم</p>
                 </div>
                 <div class="stats-summary">
                     <div class="stat-item" id="lessonStat">
@@ -77,6 +89,17 @@
                     <button class="eval-btn needs-work" onclick="setEvaluation('يحتاج مراجعة 🔄')">يحتاج مراجعة</button>
                 </div>
                 <div id="selectedEval" class="selected-eval-display">التقييم الحالي: <span>لم يتم التقييم</span></div>
+            </section>
+
+            <!-- Student History Section -->
+            <section id="historySection" class="module-card history-section">
+                <div class="section-header">
+                    <h3>📜 سجل إنجازات الطالب</h3>
+                    <button class="btn-clear-history" onclick="archiveToday()">حفظ إنجاز اليوم 💾</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <p class="empty-msg">لا توجد سجلات سابقة لهذا الطالب بعد.</p>
+                </div>
             </section>
 
             <!-- Share Section (Placeholder for Module 4) -->
