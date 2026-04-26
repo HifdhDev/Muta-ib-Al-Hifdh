@@ -8,7 +8,12 @@ const state = {
 };
 
 function initApp() {
-    updateDate();
+    // Set default date in picker
+    const datePicker = document.getElementById('achievementDate');
+    const today = new Date().toISOString().split('T')[0];
+    datePicker.value = today;
+    
+    updateDateDisplay();
     loadFromLocal();
     registerSW();
     renderStudentList();
@@ -29,14 +34,6 @@ function loadFromLocal() {
     const savedStudents = localStorage.getItem('hifdh_students');
     if (savedStudents) {
         state.students = JSON.parse(savedStudents);
-        
-        const lastDate = localStorage.getItem('hifdh_last_date');
-        const todayStr = new Date().toLocaleDateString('ar-SA');
-        
-        if (lastDate !== todayStr) {
-            // Auto-archive if date changed (optional, but let's keep it manual for user control)
-            localStorage.setItem('hifdh_last_date', todayStr);
-        }
     }
 }
 
@@ -44,12 +41,20 @@ function saveToLocal() {
     localStorage.setItem('hifdh_students', JSON.stringify(state.students));
 }
 
-function updateDate() {
+window.updateDateDisplay = function() {
+    const picker = document.getElementById('achievementDate');
     const dateEl = document.getElementById('currentDate');
-    const now = new Date();
+    
+    const selectedDate = new Date(picker.value);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateEl.textContent = now.toLocaleDateString('ar-SA', options);
-}
+    const formattedDate = selectedDate.toLocaleDateString('ar-SA', options);
+    
+    dateEl.textContent = formattedDate;
+    
+    // Also update modal date if it's open
+    const cardDate = document.getElementById('cardDate');
+    if (cardDate) cardDate.textContent = formattedDate;
+};
 
 // UI Rendering
 function renderStudentList() {
@@ -70,14 +75,13 @@ window.selectStudent = function(index) {
     const student = state.students[index];
     
     document.getElementById('activeStudentName').textContent = student.name;
-    document.getElementById('activeStudentPhone').textContent = student.phone ? `📱 ${student.phone}` : 'بدون رقم';
+    
+    // Set inputs to current values if any
+    document.getElementById('lessonInput').value = student.today.lesson || '';
+    document.getElementById('revisionInput').value = student.today.revision || '';
     
     updateSummary();
     renderHistory();
-    
-    const evalDisplay = document.querySelector('#selectedEval span');
-    evalDisplay.textContent = student.today.evaluation || 'لم يتم التقييم';
-    
     renderStudentList();
     checkShareVisibility();
 };
@@ -91,7 +95,10 @@ window.showAddStudentPrompt = function() {
     const newStudent = {
         name: name,
         phone: phone || '',
-        today: { lesson: null, revision: null, evaluation: null },
+        today: { 
+            lesson: null, lessonEval: null, 
+            revision: null, revisionEval: null 
+        },
         history: []
     };
     
@@ -101,31 +108,82 @@ window.showAddStudentPrompt = function() {
     selectStudent(state.students.length - 1);
 };
 
+// Data Management
+window.setEvaluation = function(type, val) {
+    if (state.activeIndex === -1) return alert('الرجاء اختيار طالب أولاً');
+    const student = state.students[state.activeIndex];
+    
+    if (type === 'lesson') {
+        const input = document.getElementById('lessonInput');
+        student.today.lesson = input.value;
+        student.today.lessonEval = val;
+    } else {
+        const input = document.getElementById('revisionInput');
+        student.today.revision = input.value;
+        student.today.revisionEval = val;
+    }
+    
+    updateSummary();
+    saveToLocal();
+    checkShareVisibility();
+};
+
+function updateSummary() {
+    if (state.activeIndex === -1) return;
+    const student = state.students[state.activeIndex];
+    const lessonVal = document.querySelector('#lessonStat .stat-value');
+    const revisionVal = document.querySelector('#revisionStat .stat-value');
+
+    const lessonText = student.today.lesson 
+        ? `${student.today.lesson} (${student.today.lessonEval || 'بدون تقييم'})` 
+        : 'لم يبدأ';
+    const revisionText = student.today.revision 
+        ? `${student.today.revision} (${student.today.revisionEval || 'بدون تقييم'})` 
+        : 'لم يبدأ';
+
+    lessonVal.textContent = lessonText;
+    revisionVal.textContent = revisionText;
+    
+    [lessonVal, revisionVal].forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = 'fadeIn 0.5s';
+    });
+}
+
 // History Logic
 window.archiveToday = function() {
     if (state.activeIndex === -1) return;
     const student = state.students[state.activeIndex];
+    const picker = document.getElementById('achievementDate');
     
     if (!student.today.lesson && !student.today.revision) {
-        return alert('لا يوجد إنجاز لتسجيله اليوم!');
+        return alert('لا يوجد إنجاز لتسجيله!');
     }
 
+    const selectedDate = new Date(picker.value);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = selectedDate.toLocaleDateString('ar-SA', options);
+
     const record = {
-        date: new Date().toLocaleDateString('ar-SA'),
+        date: formattedDate,
         lesson: student.today.lesson,
+        lessonEval: student.today.lessonEval,
         revision: student.today.revision,
-        evaluation: student.today.evaluation
+        revisionEval: student.today.revisionEval
     };
 
     if (!student.history) student.history = [];
-    student.history.unshift(record); // Add to beginning
+    student.history.unshift(record);
     
     // Clear today
-    student.today = { lesson: null, revision: null, evaluation: null };
+    student.today = { lesson: null, lessonEval: null, revision: null, revisionEval: null };
+    document.getElementById('lessonInput').value = '';
+    document.getElementById('revisionInput').value = '';
     
     saveToLocal();
     selectStudent(state.activeIndex);
-    alert('تم حفظ إنجاز اليوم في السجل بنجاح! ✅');
+    alert('تم حفظ الإنجاز في السجل بنجاح! ✅');
 };
 
 function renderHistory() {
@@ -142,61 +200,12 @@ function renderHistory() {
         <div class="history-item">
             <span class="history-date">${item.date}</span>
             <div class="history-content">
-                <span>📚 الدرس: ${item.lesson || '---'}</span>
-                <span>🔄 المراجعة: ${item.revision || '---'}</span>
-                <span>🏆 التقييم: ${item.evaluation || '---'}</span>
+                <span>📚 الدرس: ${item.lesson || '---'} [${item.lessonEval || 'بدون'}]</span>
+                <span>🔄 المراجعة: ${item.revision || '---'} [${item.revisionEval || 'بدون'}]</span>
             </div>
         </div>
     `).join('');
 }
-
-// Data Management
-window.saveLesson = function() {
-    if (state.activeIndex === -1) return alert('الرجاء اختيار طالب أولاً');
-    const input = document.getElementById('lessonInput');
-    if (input.value.trim() === '') return;
-    
-    state.students[state.activeIndex].today.lesson = input.value;
-    updateSummary();
-    saveToLocal();
-    input.value = '';
-};
-
-window.saveRevision = function() {
-    if (state.activeIndex === -1) return alert('الرجاء اختيار طالب أولاً');
-    const input = document.getElementById('revisionInput');
-    if (input.value.trim() === '') return;
-    
-    state.students[state.activeIndex].today.revision = input.value;
-    updateSummary();
-    saveToLocal();
-    input.value = '';
-};
-
-function updateSummary() {
-    if (state.activeIndex === -1) return;
-    const student = state.students[state.activeIndex];
-    const lessonVal = document.querySelector('#lessonStat .stat-value');
-    const revisionVal = document.querySelector('#revisionStat .stat-value');
-
-    lessonVal.textContent = student.today.lesson || 'لم يبدأ';
-    revisionVal.textContent = student.today.revision || 'لم يبدأ';
-    
-    [lessonVal, revisionVal].forEach(el => {
-        el.style.animation = 'none';
-        el.offsetHeight;
-        el.style.animation = 'fadeIn 0.5s';
-    });
-    checkShareVisibility();
-}
-
-window.setEvaluation = function(val) {
-    if (state.activeIndex === -1) return alert('الرجاء اختيار طالب أولاً');
-    state.students[state.activeIndex].today.evaluation = val;
-    document.querySelector('#selectedEval span').textContent = val;
-    saveToLocal();
-    checkShareVisibility();
-};
 
 function checkShareVisibility() {
     const shareSection = document.getElementById('shareSection');
@@ -223,11 +232,15 @@ function checkShareVisibility() {
 
 window.generateShareCard = function() {
     const student = state.students[state.activeIndex];
+    const dateText = document.getElementById('currentDate').textContent;
+    
     document.getElementById('displayStudentName').textContent = student.name;
     document.getElementById('displayLesson').textContent = student.today.lesson || 'لم يتم تسجيل درس';
+    document.getElementById('displayLessonEval').textContent = student.today.lessonEval ? `التقييم: ${student.today.lessonEval}` : '';
     document.getElementById('displayRevision').textContent = student.today.revision || 'لم يتم تسجيل مراجعة';
-    document.getElementById('displayEval').textContent = student.today.evaluation || 'لم يتم التقييم بعد';
-    document.getElementById('cardDate').textContent = document.getElementById('currentDate').textContent;
+    document.getElementById('displayRevisionEval').textContent = student.today.revisionEval ? `التقييم: ${student.today.revisionEval}` : '';
+    
+    document.getElementById('cardDate').textContent = dateText;
     document.getElementById('shareModal').style.display = 'flex';
 };
 
@@ -237,14 +250,18 @@ window.closeModal = function() {
 
 window.shareToWhatsApp = function() {
     const student = state.students[state.activeIndex];
+    const dateText = document.getElementById('currentDate').textContent;
+    
     const text = `
 📖 *تقرير الإنجاز اليومي*
-📅 التاريخ: ${document.getElementById('currentDate').textContent}
+📅 التاريخ: ${dateText}
 👤 الطالب: ${student.name}
 -------------------------
 📚 الدرس الجديد: ${student.today.lesson || '---'}
+🏆 تقييم الدرس: ${student.today.lessonEval || '---'}
+-------------------------
 🔄 المراجعة: ${student.today.revision || '---'}
-🏆 التقييم: ${student.today.evaluation || '---'}
+🏆 تقييم المراجعة: ${student.today.revisionEval || '---'}
 -------------------------
 بإشراف تطبيق مُتابع الحفظ
     `.trim();
@@ -262,12 +279,27 @@ window.copyCardContent = function() {
     const reportText = `
 📖 *تقرير الإنجاز اليومي*
 👤 الطالب: ${student.name}
-📚 الدرس: ${student.today.lesson || '---'}
-🔄 المراجعة: ${student.today.revision || '---'}
-🏆 التقييم: ${student.today.evaluation || '---'}
+📚 الدرس: ${student.today.lesson || '---'} (${student.today.lessonEval || '---'})
+🔄 المراجعة: ${student.today.revision || '---'} (${student.today.revisionEval || '---'})
     `.trim();
 
     navigator.clipboard.writeText(reportText).then(() => {
         alert('تم نسخ التقرير بنجاح!');
+    });
+};
+
+window.downloadCardAsImage = function() {
+    const card = document.getElementById('achievementCard');
+    const studentName = state.students[state.activeIndex].name;
+    
+    // Create image
+    html2canvas(card, {
+        scale: 2, // Higher quality
+        backgroundColor: '#f0fdf4'
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `إنجاز_${studentName}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
     });
 };

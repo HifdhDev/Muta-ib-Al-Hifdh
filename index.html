@@ -41,9 +41,11 @@
                 <div class="hero-content">
                     <div class="student-header">
                         <h2 id="activeStudentName">اختر طالباً</h2>
-                        <span id="activeStudentPhone" class="student-phone-badge"></span>
+                        <div class="date-picker-container">
+                            <input type="date" id="achievementDate" onchange="updateDateDisplay()">
+                        </div>
                     </div>
-                    <p class="subtitle">تتبع إنجاز الطالب الحالي لليوم</p>
+                    <p class="subtitle">تتبع إنجاز الطالب وتاريخه</p>
                 </div>
                 <div class="stats-summary">
                     <div class="stat-item" id="lessonStat">
@@ -64,7 +66,12 @@
                     <div class="form-group">
                         <label for="lessonInput">مقدار الحفظ لليوم:</label>
                         <input type="text" id="lessonInput" placeholder="مثال: سورة البقرة من 1 إلى 20" aria-label="مقدار الدرس الجديد">
-                        <button class="btn btn-primary" onclick="saveLesson()">حفظ</button>
+                        <div class="mini-eval-options">
+                            <button class="eval-btn excel" onclick="setEvaluation('lesson', 'ممتاز 🌟')">ممتاز</button>
+                            <button class="eval-btn vgood" onclick="setEvaluation('lesson', 'جيد جداً ✅')">جيد جداً</button>
+                            <button class="eval-btn good" onclick="setEvaluation('lesson', 'جيد 🆗')">جيد</button>
+                            <button class="eval-btn needs-work" onclick="setEvaluation('lesson', 'يحتاج مراجعة 🔄')">يحتاج مراجعة</button>
+                        </div>
                     </div>
                 </section>
 
@@ -73,23 +80,15 @@
                     <div class="form-group">
                         <label for="revisionInput">مقدار المراجعة لليوم:</label>
                         <input type="text" id="revisionInput" placeholder="مثال: الجزء الأول" aria-label="مقدار المراجعة">
-                        <button class="btn btn-secondary" onclick="saveRevision()">حفظ</button>
+                        <div class="mini-eval-options">
+                            <button class="eval-btn excel" onclick="setEvaluation('revision', 'ممتاز 🌟')">ممتاز</button>
+                            <button class="eval-btn vgood" onclick="setEvaluation('revision', 'جيد جداً ✅')">جيد جداً</button>
+                            <button class="eval-btn good" onclick="setEvaluation('revision', 'جيد 🆗')">جيد</button>
+                            <button class="eval-btn needs-work" onclick="setEvaluation('revision', 'يحتاج مراجعة 🔄')">يحتاج مراجعة</button>
+                        </div>
                     </div>
                 </section>
             </div>
-
-            <!-- Evaluation Section (Challenge Board) -->
-            <section id="evaluationSection" class="module-card challenge-board">
-                <h3>🏆 تحدي الإتقان</h3>
-                <p class="section-hint">كيف كان مستوى التسميع اليوم؟</p>
-                <div class="evaluation-options">
-                    <button class="eval-btn excel" onclick="setEvaluation('ممتاز 🌟')">ممتاز</button>
-                    <button class="eval-btn vgood" onclick="setEvaluation('جيد جداً ✅')">جيد جداً</button>
-                    <button class="eval-btn good" onclick="setEvaluation('جيد 🆗')">جيد</button>
-                    <button class="eval-btn needs-work" onclick="setEvaluation('يحتاج مراجعة 🔄')">يحتاج مراجعة</button>
-                </div>
-                <div id="selectedEval" class="selected-eval-display">التقييم الحالي: <span>لم يتم التقييم</span></div>
-            </section>
 
             <!-- Student History Section -->
             <section id="historySection" class="module-card history-section">
@@ -135,6 +134,7 @@
                                 <div class="detail-text">
                                     <span class="label">الدرس الجديد:</span>
                                     <span id="displayLesson" class="value"></span>
+                                    <span id="displayLessonEval" class="eval-badge"></span>
                                 </div>
                             </div>
                             <div class="detail-item">
@@ -142,13 +142,7 @@
                                 <div class="detail-text">
                                     <span class="label">المراجعة:</span>
                                     <span id="displayRevision" class="value"></span>
-                                </div>
-                            </div>
-                            <div class="detail-item challenge-detail">
-                                <span class="icon">🏆</span>
-                                <div class="detail-text">
-                                    <span class="label">التقييم:</span>
-                                    <span id="displayEval" class="value highlight"></span>
+                                    <span id="displayRevisionEval" class="eval-badge"></span>
                                 </div>
                             </div>
                         </div>
@@ -157,7 +151,10 @@
                         <p>بإشراف نظام مُتابع الحفظ</p>
                     </div>
                 </div>
-                <button class="btn btn-primary share-final-btn" onclick="copyCardContent()">نسخ التقرير للنشر 📋</button>
+                <div class="share-btns-modal">
+                    <button class="btn btn-primary share-final-btn" onclick="copyCardContent()">نسخ النص 📋</button>
+                    <button class="btn btn-secondary share-final-btn" onclick="downloadCardAsImage()">تحميل صورة 🖼️</button>
+                </div>
             </div>
         </div>
 
@@ -167,6 +164,7 @@
         </footer>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
