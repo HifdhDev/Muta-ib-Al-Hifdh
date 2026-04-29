@@ -56,10 +56,10 @@ window.updateDateDisplay = function() {
         year: 'numeric'
     }).format(selectedDate);
 
-    dateEl.innerHTML = `${formattedDate}<br><span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">${hijriDate} هـ</span>`;
+    dateEl.innerHTML = `${hijriDate} هـ<br><span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">الموافق: ${formattedDate}</span>`;
     
     const cardDate = document.getElementById('cardDate');
-    if (cardDate) cardDate.innerHTML = `${formattedDate}<br>${hijriDate} هـ`;
+    if (cardDate) cardDate.innerHTML = `${hijriDate} هـ<br><span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">الموافق: ${formattedDate}</span>`;
 };
 
 function renderStudentList() {
@@ -182,13 +182,13 @@ function renderHistory() {
     historyList.innerHTML = student.history.map((item, index) => `
         <div class="history-item">
             <div class="history-header-row">
-                <span class="history-date">${item.date}</span>
+                <span class="history-date">🌙 ${item.hijri || '---'} هـ</span>
                 <button class="btn-history-share" onclick="shareFromHistory(${index})">مشاركة 📤</button>
             </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">📅 الموافق: ${item.date}</div>
             <div class="history-content">
                 <span>📚 الدرس: ${item.lesson || '---'} [${item.lessonEval || 'بدون'}]</span>
                 <span>🔄 المراجعة: ${item.revision || '---'} [${item.revisionEval || 'بدون'}]</span>
-                ${item.hijri ? `<span style="font-size: 0.8rem; color: var(--primary); display: block; margin-top: 4px;">🌙 ${item.hijri} هـ</span>` : ''}
             </div>
         </div>
     `).join('');

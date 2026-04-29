@@ -290,7 +290,7 @@
                 year: 'numeric'
             }).format(now);
             
-            document.getElementById('headerDate').innerHTML = `${gregDate}<br><span style="font-size: 0.9rem; opacity: 0.9;">${hijriDate} هـ</span>`;
+            document.getElementById('headerDate').innerHTML = `${hijriDate} هـ<br><span style="font-size: 0.9rem; opacity: 0.9;">الموافق: ${gregDate}</span>`;
         }
 
         // Data Persistence
@@ -397,9 +397,9 @@
                 ${student.history.map((h, i) => `
                     <div class="history-card" id="history-card-${i}">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div class="history-date">
-                                📅 ${h.date}
-                                ${h.hijri ? `<br><small style="color: var(--primary)">🌙 ${h.hijri} هـ</small>` : ''}
+                            <div class="history-date" style="font-size: 1.1rem; color: var(--primary);">
+                                🌙 ${h.hijri} هـ
+                                <br><small style="color: var(--text-muted); font-weight: normal; font-size: 0.8rem;">📅 الموافق: ${h.date}</small>
                             </div>
                         </div>
                         <div class="history-content">
