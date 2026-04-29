@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مُتابع الحفظ Pro</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --glass: blur(10px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: 80px; /* Space for Bottom Nav */
+        }
+
+        /* --- Layout --- */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem 1rem 3rem;
+            text-align: center;
+            border-bottom-left-radius: 2rem;
+            border-bottom-right-radius: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            padding: 1rem;
+            max-width: 600px;
+            margin: -2rem auto 0;
+        }
+
+        /* --- Navigation --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* --- Sections --- */
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Cards & UI Elements --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.8rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        /* --- Forms & Inputs --- */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+        .form-input {
+            width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 1px solid rgba(0,0,0,0.1);
+            background: #f1f5f9; font-size: 1rem; transition: 0.3s;
+        }
+        .form-input:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
+
+        /* --- Evaluation Buttons --- */
+        .eval-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem; }
+        .eval-btn {
+            padding: 0.6rem; border-radius: 0.6rem; border: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: white;
+        }
+        .eval-btn.active { color: white; border-color: transparent; transform: scale(0.95); }
+        .eval-btn.excellent.active { background: #10b981; }
+        .eval-btn.vgood.active { background: #3b82f6; }
+        .eval-btn.good.active { background: #f59e0b; }
+        .eval-btn.needs-work.active { background: #ef4444; }
+
+        .section-title { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .divider { height: 1px; background: rgba(0,0,0,0.05); margin: 1rem 0; }
+
+        /* --- History Cards --- */
+        .history-card {
+            border-right: 4px solid var(--secondary);
+            padding: 1rem; margin-bottom: 1rem; position: relative;
+            background: #f8fafc; border-radius: 0.8rem;
+        }
+        .history-date { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .history-content { font-size: 0.9rem; }
+        .history-tag { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 0.5rem; margin-right: 0.5rem; color: white; }
+
+        /* --- New Share Buttons --- */
+        .history-actions { display: flex; gap: 0.4rem; margin-top: 0.8rem; flex-wrap: wrap; }
+        .action-btn {
+            flex: 1; min-width: 80px; padding: 0.5rem; border-radius: 0.6rem; border: none;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+            color: white;
+        }
+        .btn-wa { background: #25d366; }
+        .btn-copy { background: var(--secondary); }
+        .btn-img { background: #6366f1; }
+        .action-btn:active { transform: scale(0.95); opacity: 0.9; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>مُتابع الحفظ Pro</h1>
+        <p id="headerDate">-- : --</p>
+    </header>
+
+    <main class="container">
+        
+        <!-- Section: Home (Achievement) -->
+        <section id="home" class="page-section active">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">🎯 إنجاز اليوم</h3>
+                <div id="activeStudentDisplay" class="empty-state">
+                    الرجاء إضافة طالب من قائمة "الطلاب" أولاً.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Students -->
+        <section id="students" class="page-section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>👥 قائمة الطلاب</h3>
+                    <button class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem;" onclick="showAddStudent()">+ إضافة</button>
+                </div>
+                <div id="studentListContainer">
+                    <!-- Students will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: History -->
+        <section id="history" class="page-section">
+            <div class="card">
+                <h3>📜 سجل الإنجازات</h3>
+                <div id="historyContainer" class="empty-state">
+                    لا توجد سجلات محفوظة بعد.
+                </div>
+            </div>
+        </section>
+
+        <section id="settings" class="page-section">
+            <div class="card">
+                <h3>⚙️ الإعدادات والخصوصية</h3>
+                <div style="margin-top: 1.5rem;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">هذا التطبيق يعمل محلياً على جهازك، بياناتك لا تُرسل لأي خادم خارجي.</p>
+                    <button class="btn" style="background: #fee2e2; color: #ef4444;" onclick="clearAllData()">⚠️ مسح كافة البيانات</button>
+                    
+                    <div class="divider"></div>
+                    <p style="font-size: 0.8rem; text-align: center; color: var(--text-muted);">مُتابع الحفظ Pro - إصدار 2.0 (أوفلاين)<br>© 2026</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showSection('home', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span>الرئيسية</span>
+        </div>
+        <div class="nav-item" onclick="showSection('students', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>الطلاب</span>
+        </div>
+        <div class="nav-item" onclick="showSection('history', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>السجل</span>
+        </div>
+        <div class="nav-item" onclick="showSection('settings', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span>إعدادات</span>
+        </div>
+    </nav>
+
+    <!-- JS Logic -->
+    <script>
+        // State Management
+        const state = {
+            students: [],
+            activeStudentIndex: -1
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderAll();
+            updateHeaderDate();
+        });
+
+        function updateHeaderDate() {
+            const now = new Date();
+            const gregOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const gregDate = now.toLocaleDateString('ar-SA', gregOptions);
+            
+            const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(now);
+            
+            document.getElementById('headerDate').innerHTML = `${gregDate}<br><span style="font-size: 0.9rem; opacity: 0.9;">${hijriDate} هـ</span>`;
+        }
+
+        // Data Persistence
+        function saveData() {
+            localStorage.setItem('hifdh_pro_data', JSON.stringify(state));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('hifdh_pro_data');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.students = parsed.students || [];
+                state.activeStudentIndex = parsed.activeStudentIndex ?? -1;
+            }
+        }
+
+        // Navigation
+        function showSection(sectionId, el) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if (el) el.classList.add('active');
+            renderAll();
+        }
+
+        // Student Management
+        function showAddStudent() {
+            const name = prompt('أدخل اسم الطالب:');
+            if (!name) return;
+            const phone = prompt('أدخل رقم واتساب ولي الأمر (اختياري - مثال: 966500000000):', '');
+            
+            const newStudent = {
+                name: name,
+                phone: phone || '',
+                today: { lesson: '', lessonEval: '', revision: '', revisionEval: '' },
+                history: []
+            };
+            
+            state.students.push(newStudent);
+            if (state.activeStudentIndex === -1) state.activeStudentIndex = 0;
+            saveData();
+            renderAll();
+        }
+
+        function deleteStudent(index, e) {
+            e.stopPropagation();
+            if (confirm(`هل أنت متأكد من حذف الطالب "${state.students[index].name}"؟`)) {
+                state.students.splice(index, 1);
+                if (state.activeStudentIndex >= state.students.length) {
+                    state.activeStudentIndex = state.students.length - 1;
+                }
+                saveData();
+                renderAll();
+            }
+        }
+
+        function selectStudent(index) {
+            state.activeStudentIndex = index;
+            saveData();
+            showSection('home', document.querySelector('.nav-item')); // Go to home
+        }
+
+        // Rendering
+        function renderAll() {
+            renderStudentList();
+            renderHome();
+            renderHistory();
+        }
+
+        function renderStudentList() {
+            const container = document.getElementById('studentListContainer');
+            if (state.students.length === 0) {
+                container.innerHTML = '<div class="empty-state">لا يوجد طلاب حالياً. أضف طلابك لتبدأ.</div>';
+                return;
+            }
+
+            container.innerHTML = state.students.map((s, i) => `
+                <div class="card student-card ${i === state.activeStudentIndex ? 'active-student' : ''}" onclick="selectStudent(${i})" 
+                     style="display: flex; justify-content: space-between; align-items: center; border-right: 5px solid ${i === state.activeStudentIndex ? 'var(--primary)' : 'transparent'}; cursor: pointer; margin-bottom: 0.8rem; padding: 1rem;">
+                    <div>
+                        <div style="font-weight: 700;">${s.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${s.phone ? '📞 ' + s.phone : 'لا يوجد رقم'}</div>
+                    </div>
+                    <button onclick="deleteStudent(${i}, event)" style="background: none; border: none; color: #ef4444; font-size: 1.2rem;">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            if (state.activeStudentIndex === -1 || !state.students[state.activeStudentIndex]) {
+                container.innerHTML = '<div class="empty-state">اختر طالباً لعرض سجله.</div>';
+                return;
+            }
+
+            const student = state.students[state.activeStudentIndex];
+            if (!student.history || student.history.length === 0) {
+                container.innerHTML = `<div class="empty-state">لا توجد سجلات محفوظة للطالب "${student.name}" بعد.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <h4 style="margin-bottom: 1rem; color: var(--text-muted);">سجل الطالب: ${student.name}</h4>
+                ${student.history.map((h, i) => `
+                    <div class="history-card" id="history-card-${i}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="history-date">
+                                📅 ${h.date}
+                                ${h.hijri ? `<br><small style="color: var(--primary)">🌙 ${h.hijri} هـ</small>` : ''}
+                            </div>
+                        </div>
+                        <div class="history-content">
+                            <div style="margin-bottom: 0.4rem;">📚 <b>الدرس:</b> ${h.lesson || '---'} <span style="color: var(--primary)">[${h.lessonEval || 'بدون'}]</span></div>
+                            <div>🔄 <b>المراجعة:</b> ${h.revision || '---'} <span style="color: var(--secondary)">[${h.revisionEval || 'بدون'}]</span></div>
+                        </div>
+                        <div class="history-actions" data-html2canvas-ignore="true">
+                            <button class="action-btn btn-wa" onclick="shareWhatsApp(${i})">واتساب 📤</button>
+                            <button class="action-btn btn-copy" onclick="copyToClipboard(${i})">نسخ 📋</button>
+                            <button class="action-btn btn-img" onclick="exportAsImage(${i})">صورة 🖼️</button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        function shareWhatsApp(historyIndex) {
+            const student = state.students[state.activeStudentIndex];
+            const h = student.history[historyIndex];
+            
+            const hijriText = h.hijri ? `\n📅 الهجري: ${h.hijri} هـ` : '';
+            const text = `
+📖 *تقرير إنجاز حفظ القرآن*
+👤 *الطالب:* ${student.name}
+📅 *الميلادي:* ${h.date}${hijriText}
+-------------------------
+📚 *الدرس الجديد:* ${h.lesson || '---'}
+🏆 *التقييم:* ${h.lessonEval || '---'}
+-------------------------
+🔄 *المراجعة:* ${h.revision || '---'}
+🏆 *التقييم:* ${h.revisionEval || '---'}
+-------------------------
+*تم الإرسال عبر تطبيق مُتابع الحفظ Pro*
+            `.trim();
+
+            const encodedText = encodeURIComponent(text);
+            const url = student.phone ? `https://wa.me/${student.phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
+            window.open(url, '_blank');
+        }
+
+        function copyToClipboard(index) {
+            const student = state.students[state.activeStudentIndex];
+            const h = student.history[index];
+            const hijriPart = h.hijri ? ` [${h.hijri} هـ]` : '';
+            const text = `📖 تقرير إنجاز: ${student.name}\n📅 التاريخ: ${h.date}${hijriPart}\n📚 الدرس: ${h.lesson || '---'} [${h.lessonEval || '---'}]\n🔄 المراجعة: ${h.revision || '---'} [${h.revisionEval || '---'}]`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ النص بنجاح! ✅');
+            }).catch(err => {
+                alert('فشل النسخ، يرجى المحاولة مرة أخرى.');
+            });
+        }
+
+        async function exportAsImage(index) {
+            const card = document.getElementById(`history-card-${index}`);
+            if (!card) return;
+
+            // Show loading state or similar if needed
+            const originalTransform = card.style.transform;
+            card.style.transform = 'scale(1)'; // Reset transform for capture
+
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2, // Higher quality
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `إنجاز_${state.students[state.activeStudentIndex].name}_${index}.png`;
+                link.href = image;
+                link.click();
+            } catch (error) {
+                console.error("Error exporting image:", error);
+                alert("حدث خطأ أثناء تصدير الصورة.");
+            } finally {
+                card.style.transform = originalTransform;
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('سيتم حذف جميع الطلاب والسجلات نهائياً. هل أنت متأكد؟')) {
+                localStorage.removeItem('hifdh_pro_data');
+                location.reload();
+            }
+        }
+
+        function renderHome() {
+            const display = document.getElementById('activeStudentDisplay');
+            if (state.activeStudentIndex === -1 || !state.students[state.activeStudentIndex]) {
+                display.innerHTML = '<div class="empty-state">الرجاء إضافة طالب من قائمة "الطلاب" أولاً.</div>';
+                return;
+            }
+
+            const student = state.students[state.activeStudentIndex];
+            const today = student.today;
+
+            display.innerHTML = `
+                <div style="text-align: right;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="font-size: 1.3rem; color: var(--primary);">${student.name}</h2>
+                        <span style="font-size: 0.8rem; background: #e1f5fe; color: #0288d1; padding: 0.2rem 0.6rem; border-radius: 1rem;">قيد التتبع ✍️</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📚 الدرس الجديد</label>
+                        <input type="text" class="form-input" placeholder="مثال: البقرة 1-20" value="${today.lesson || ''}" oninput="updateToday('lesson', this.value)">
+                        <div class="eval-grid">
+                            <button class="eval-btn excellent ${today.lessonEval === 'ممتاز' ? 'active' : ''}" onclick="setEval('lesson', 'ممتاز')">ممتاز 🌟</button>
+                            <button class="eval-btn vgood ${today.lessonEval === 'جيد جداً' ? 'active' : ''}" onclick="setEval('lesson', 'جيد جداً')">جيد جداً ✅</button>
+                            <button class="eval-btn good ${today.lessonEval === 'جيد' ? 'active' : ''}" onclick="setEval('lesson', 'جيد')">جيد 🆗</button>
+                            <button class="eval-btn needs-work ${today.lessonEval === 'يحتاج مراجعة' ? 'active' : ''}" onclick="setEval('lesson', 'يحتاج مراجعة')">مراجعة 🔄</button>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="form-group">
+                        <label>🔄 المراجعة</label>
+                        <input type="text" class="form-input" placeholder="مثال: الجزء الأول" value="${today.revision || ''}" oninput="updateToday('revision', this.value)">
+                        <div class="eval-grid">
+                            <button class="eval-btn excellent ${today.revisionEval === 'ممتاز' ? 'active' : ''}" onclick="setEval('revision', 'ممتاز')">ممتاز 🌟</button>
+                            <button class="eval-btn vgood ${today.revisionEval === 'جيد جداً' ? 'active' : ''}" onclick="setEval('revision', 'جيد جداً')">جيد جداً ✅</button>
+                            <button class="eval-btn good ${today.revisionEval === 'جيد' ? 'active' : ''}" onclick="setEval('revision', 'جيد')">جيد 🆗</button>
+                            <button class="eval-btn needs-work ${today.revisionEval === 'يحتاج مراجعة' ? 'active' : ''}" onclick="setEval('revision', 'يحتاج مراجعة')">مراجعة 🔄</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="archiveToday()">حفظ إنجاز اليوم 💾</button>
+                </div>
+            `;
+        }
+
+        // Achievement Logic
+        function updateToday(field, value) {
+            if (state.activeStudentIndex === -1) return;
+            state.students[state.activeStudentIndex].today[field] = value;
+            saveData();
+        }
+
+        function setEval(type, value) {
+            if (state.activeStudentIndex === -1) return;
+            const today = state.students[state.activeStudentIndex].today;
+            if (type === 'lesson') today.lessonEval = value;
+            else today.revisionEval = value;
+            saveData();
+            renderHome();
+        }
+
+        function archiveToday() {
+            if (state.activeStudentIndex === -1) return;
+            const student = state.students[state.activeStudentIndex];
+            if (!student.today.lesson && !student.today.revision) {
+                alert('الرجاء إدخال إنجاز أولاً!');
+                return;
+            }
+
+            const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(new Date());
+
+            const record = {
+                date: new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' }),
+                hijri: hijriDate,
+                ...student.today
+            };
+
+            student.history.unshift(record);
+            student.today = { lesson: '', lessonEval: '', revision: '', revisionEval: '' };
+            saveData();
+            alert('تم حفظ الإنجاز في السجل بنجاح! ✅');
+            renderAll();
+        }
+    </script>
+</body>
+</html>

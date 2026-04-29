@@ -45,11 +45,21 @@ window.updateDateDisplay = function() {
     const picker = document.getElementById('achievementDate');
     const dateEl = document.getElementById('currentDate');
     const selectedDate = new Date(picker.value);
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = selectedDate.toLocaleDateString('ar-SA', options);
-    dateEl.textContent = formattedDate;
+    
+    const gregOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = selectedDate.toLocaleDateString('ar-SA', gregOptions);
+    
+    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }).format(selectedDate);
+
+    dateEl.innerHTML = `${formattedDate}<br><span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">${hijriDate} هـ</span>`;
+    
     const cardDate = document.getElementById('cardDate');
-    if (cardDate) cardDate.textContent = formattedDate;
+    if (cardDate) cardDate.innerHTML = `${formattedDate}<br>${hijriDate} هـ`;
 };
 
 function renderStudentList() {
@@ -127,11 +137,19 @@ window.archiveToday = function() {
     }
 
     const selectedDate = new Date(picker.value);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = selectedDate.toLocaleDateString('ar-SA', options);
+    
+    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }).format(selectedDate);
 
     const record = {
         date: formattedDate,
+        hijri: hijriDate,
         name: student.name,
         lesson: student.today.lesson,
         lessonEval: student.today.lessonEval,
@@ -170,6 +188,7 @@ function renderHistory() {
             <div class="history-content">
                 <span>📚 الدرس: ${item.lesson || '---'} [${item.lessonEval || 'بدون'}]</span>
                 <span>🔄 المراجعة: ${item.revision || '---'} [${item.revisionEval || 'بدون'}]</span>
+                ${item.hijri ? `<span style="font-size: 0.8rem; color: var(--primary); display: block; margin-top: 4px;">🌙 ${item.hijri} هـ</span>` : ''}
             </div>
         </div>
     `).join('');
@@ -207,8 +226,8 @@ window.whatsappGeneric = function(dataJson, dateText) {
     const student = state.students[state.activeIndex];
     const text = `
 📖 *تقرير إنجاز*
-📅 التاريخ: ${dateText}
-👤 الطالب: ${student.name}
+📅 الميلادي: ${dateText}
+${data.hijri ? `📅 الهجري: ${data.hijri} هـ\n` : ''}👤 الطالب: ${student.name}
 -------------------------
 📚 الدرس الجديد: ${data.lesson || '---'}
 🏆 تقييم الدرس: ${data.lessonEval || '---'}
@@ -226,7 +245,8 @@ window.whatsappGeneric = function(dataJson, dateText) {
 window.copyGeneric = function(dataJson, dateText) {
     const data = JSON.parse(decodeURIComponent(dataJson));
     const student = state.students[state.activeIndex];
-    const text = `📖 تقرير إنجاز الطالب: ${student.name}\n📅 التاريخ: ${dateText}\n📚 الدرس: ${data.lesson || '---'} (${data.lessonEval || '---'})\n🔄 المراجعة: ${data.revision || '---'} (${data.revisionEval || '---'})`;
+    const hijriPart = data.hijri ? ` [${data.hijri} هـ]` : '';
+    const text = `📖 تقرير إنجاز الطالب: ${student.name}\n📅 التاريخ: ${dateText}${hijriPart}\n📚 الدرس: ${data.lesson || '---'} (${data.lessonEval || '---'})\n🔄 المراجعة: ${data.revision || '---'} (${data.revisionEval || '---'})`;
     navigator.clipboard.writeText(text).then(() => alert('تم النسخ!'));
 };
 
